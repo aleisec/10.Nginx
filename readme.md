@@ -35,7 +35,7 @@ Nginx 是一款高性能的 Web和 反向代理 服务器，简单来说就是�
 ### 二、安装
 [下载nginx](http://nginx.org/en/download.html)
 
-* 解压，存放在心仪的，这里我们存放到 `G:\`
+* 解压，存放在心仪的，这里我们存放到 `G:\`， 注意目录中不能有中文
 * 打开cmd,进入`G:\nginx-1.14.1` 目录,
 * 运行命令`start nginx`启动nginx服务。访问localhost:80（默认，可以自己设置）测试是否访问成功。
 >至此，nginx服务器安装和启动完毕
@@ -79,14 +79,35 @@ server {
 ```
 
 ---
-nginx.conf配置参数亲测：
+### 六、把nginx设置为反向代理服务器，实现负载均衡：
+```
+ #配置负载均衡的服务器
+upstream myapp {
+       		# ip_hash; # 使用这个指令，会分析ip地址再去分配该请求，确保一个客户只和一台服务器通信，解决session\cookies共享问题
+            server localhost:4000; #express服务
+            server localhost:8000; #express服务
+}
+server {
+    listen       3000;
+    # 后端接口负载均衡
+	location ^~ /api/ {
+        proxy_pass http://myapp;
+    }
+    # 前端页面负载均衡，设置静态文件路径需要在 upstream 2个server中配置
+    location / {
+		proxy_pass http://myapp;
+    }
+}
+```
 
-*参数解读：*
+---
+### 七、参数解读：
+nginx.conf配置参数亲测：
 ```
 server {
         listen      7000;  #端口，默认80
-        server_name  localhost;   #
-        #默认匹配到 / 访问当前目录下html文件夹中的index.html 欢迎页面
+    server_name  test.com; #可以通过test.com:3000访问这个nginx服务，不使用这个指令的话需要在host文件中配置test.com=>127.0.0.1的映射，然后才能通过test.com:3000去访问这个服务。也可以直接使用127.0.0.1:3000访问。配置后在server_name不同的情况下可以重复使用端口
+
 		location / {                   location指令后面为为匹配url的规则，相当于if
             root   html;
             index  index.html index.htm;
@@ -100,12 +121,23 @@ server {
    }
 
 ```
-* location 指令中使用表达式要用 ~ 或者 ~* 符号指明，~表示区分大小写，~* 表示不区分大小写。
+location匹配优先级排序：
+
+1. 等号类型（=）的优先级最高。一旦匹配成功，则不再查找其他匹配项。（location = abc ）
+2.^~类型表达式。一旦匹配成功，则不再查找其他匹配项。（location ^~ /images/）
+3.正则表达式类型（~ ~*）的优先级次之。如果有多个location的正则能匹配的话，则使用正则表达式最长的那个。（location ~* \.(gif|jpg|jpeg)$）
+4.常规字符串匹配类型。按前缀匹配。（location /documents/ ）
 
 
+---
 
 
-nginx服务可以根据请求的路径，分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
+### 注意点：
+1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
+2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的，而不是nginx服务设置的。请求头时前端设置的，也不是nginx设置的**。
+>正向代理只是起到一个桥梁的左右，可以设置多个桥梁，例如前端请求node服务代理，node代理请求nginx搭理，nginx搭理请求真正的后台。
+3. nginx正向代理服务也支持跨域，即*浏览器访问的地址的协议域名端口*与*nginx代理服务的协议域名端口*可以不一致。
+>（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:8000的服务上设置响应头支持跨域。
 ### 遇见的报错error
 nginx: [emerg] invalid number of arguments in "root" directive    
 root参数的属性值无效，（路径错误）

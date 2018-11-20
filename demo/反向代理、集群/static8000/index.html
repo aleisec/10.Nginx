@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+	</head>
+	<body>
+		<h1>index8000</h1>
+		<p id="res">xxxxxxx</p>
+	</body>
+	<script type="text/javascript">
+		$.ajax({
+			url:"http://localhost:3000/api/test",
+			dataType:"json",
+			success:function(res){
+				$('#res').html(res.data)
+			}
+		})
+	</script>
+</html>
