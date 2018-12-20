@@ -46,7 +46,7 @@ Nginx 是一款高性能的 Web和 反向代理 服务器，简单来说就是�
 * 验证配置是否正确: nginx -t
 * 查看Nginx的版本号：nginx -V
 * 启动Nginx：start nginx
-* 配置文件修改重装载命令：nginx -s +eload
+* 配置文件修改重装载命令：nginx -s reload
 * 快速停止或关闭Nginx：nginx -s stop
 * 正常停止或关闭Nginx：nginx -s quit
 * window下终止所有的nginx进程命令：taskkill /im nginx.exe /f
