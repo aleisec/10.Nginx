@@ -59,7 +59,12 @@ window下测试nginx,感觉好像配置修改后不生效，服务器关了还�
 ```
     server {
         listen       3000;
-		root   G:\WEB\web前端\vueMysize\vue大屏框架\LS\dist;
+          # 前端静态文件路径
+		location / {
+            root   F:\biguiyuan\project;
+            # 缓存过期时间
+            expires 3d;
+        }
     }
 ```
 
@@ -71,7 +76,17 @@ window下测试nginx,感觉好像配置修改后不生效，服务器关了还�
 ```
 server {
         listen       3000;
-		root   G:\WEB\web前端\vueMysize\vue大屏框架\LS\dist;
+		  # 前端静态文件路径
+		location / {
+            root   F:\biguiyuan\project;
+            # 缓存过期时间
+            expires 3d;
+        }
+        # index.html不使用缓存
+        location ~* \index.html$ {  
+    		root   F:\biguiyuan\project;
+		    expires -1; 
+		}
 		#api为后端文件夹名称
 		location /api/ {
 	         proxy_pass http://localhost:8000;
@@ -102,14 +117,14 @@ server {
 ```
 
 ---
-### 七、参数解读：
+### 七、原配置参数解读：
 nginx.conf配置参数亲测：
 ```
 server {
         listen      7000;  #端口，默认80
     server_name  test.com; #可以通过test.com:3000访问这个nginx服务，不使用这个指令的话需要在host文件中配置test.com=>127.0.0.1的映射，然后才能通过test.com:3000去访问这个服务。也可以直接使用127.0.0.1:3000访问。配置后在server_name不同的情况下可以重复使用端口
 
-		location / {                   location指令后面为为匹配url的规则，相当于if
+		location / {                   location指令后面为为匹配url的规则，相当于if，/前端文件匹配进这里
             root   html;
             index  index.html index.htm;
         }
@@ -132,13 +147,29 @@ location匹配优先级排序：
 
 ---
 
+### 七、开启gzip：
+指服务器返回资源前先经过压缩在返回，减少资源体积，加快请求速度，减少请求使用的流量。
+在#gzip注释下增加配置：
+```
+gzip  on; #开启压缩传输功能
+gzip_min_length 1k; #大于1K的文件才压缩
+gzip_buffers 4 16k;
+gzip_http_version 1.0;
+gzip_comp_level 6; #压缩等级， 1-9，等级越高压缩得越慢
+gzip_types  application/javascript text/plain application/json application/x-www-form-urlencoded text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;#匹配请求的contentType，这些contentType类型的内容会进行gzip压缩
+gzip_disable "MSIE [1-6]\.";#ie6一下的浏览器不使用gzip功能
+gzip_vary on;#添加vary响应头,验证缓存
+```
 
 ### 注意点：
 1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
 2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的，而不是nginx服务设置的。请求头时前端设置的，也不是nginx设置的**。
 >正向代理只是起到一个桥梁的左右，可以设置多个桥梁，例如前端请求node服务代理，node代理请求nginx搭理，nginx搭理请求真正的后台。
 3. nginx正向代理服务也支持跨域，即*浏览器访问的地址的协议域名端口*与*nginx代理服务的协议域名端口*可以不一致。
->（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:8000的服务上设置响应头支持跨域。
+>（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:8000的服务上设置响应头支持跨域。       
+
+
+附：[nginx 配置文件中的nginx的location配置详解](https://www.cnblogs.com/sign-ptk/p/6723048.html) 
 ### 遇见的报错error
 nginx: [emerg] invalid number of arguments in "root" directive    
 root参数的属性值无效，（路径错误）
