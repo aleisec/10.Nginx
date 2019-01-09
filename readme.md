@@ -122,7 +122,7 @@ nginx.conf配置参数亲测：
 ```
 server {
         listen      7000;  #端口，默认80
-    server_name  test.com; #可以通过test.com:3000访问这个nginx服务，不使用这个指令的话需要在host文件中配置test.com=>127.0.0.1的映射，然后才能通过test.com:3000去访问这个服务。也可以直接使用127.0.0.1:3000访问。配置后在server_name不同的情况下可以重复使用端口
+    server_name  test.com; #？？
 
 		location / {                   location指令后面为为匹配url的规则，相当于if，/前端文件匹配进这里
             root   html;
@@ -161,6 +161,44 @@ gzip_disable "MSIE [1-6]\.";#ie6一下的浏览器不使用gzip功能
 gzip_vary on;#添加vary响应头,验证缓存
 ```
 
+### 八、自定义404页面
+* 在http/或server/或location下配置 proxy_intercept_errors on;  启用自定义错误页面,开启根据请求返回的状态码进行页面跳转的功能,默认off,当被代理的请求响应状态码大于等于300时，决定是否直接将响应发送给客户端，亦或将响应转发给nginx由error_page指令来处理。
+* 在server下配置 error_page (例如：error_page  404  http://www.baidu.com;) 表示状态码为404时跳转至百度页面
+```
+#server中的配置
+error_page   404  /404.html; #状态吗     重定向的地址
+location = /404.html {
+    root   html;  /在html文件夹下要有404.html页面
+}
+
+```
+每个server或location可以单独配置自己的proxy_intercept_errors on和error_page
+
+
+### 九、nginx的配置语言和内置参数
+#### 配置语言：
+* proxy_set_header 代理时设置请求头
+* proxy_pass  代理到...
+#### 内置参数：
+* $remote_addr ：#发出请求的访问地址的IP地址
+```
+proxy_set_header X-Real-Ip $remote_addr;  X-Real-IP请求头一般只记录真实发出请求的客户端IP
+```
+* $proxy_add_x_forwarded_for ：#请求的请求头中的"X-Forwarded-For"，与$remote_addr（请求的IP地址）两部分，他们之间用逗号分开。
+```
+举个例子，有一个web应用，在它之前通过了两个nginx转发，即用户访问该web通过两台nginx。 
+在第一台nginx中,使用 
+proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for; 
+现在的$proxy_add_x_forwarded_for变量的"X-Forwarded-For"部分是空的，所以只有$remote_addr，而$remote_addr的值是用户的ip，于是赋值以后，X-Forwarded-For变量的值就是用户的真实的ip地址了。 
+到了第二台nginx，使用 
+proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
+现在的$proxy_add_x_forwarded_for变量，X-Forwarded-For部分包含的是用户的真实ip，$remote_addr部分的值是上一台nginx的ip地址，于是通过这个赋值以后现在的X-Forwarded-For的值就变成了“用户的真实ip，第一台nginx的ip”，这样就清楚了吧。
+```
+* $http_host：#请求地址，即浏览器中你输入的地址（IP或域名）
+* $scheme ：   #请求使用的Web协议，"http" 或 "https"
+```
+proxy_set_header X-Forwarded-Proto $scheme; 设置代理请求的和原协议保持一致协议
+```
 ### 注意点：
 1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
 2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的，而不是nginx服务设置的。请求头时前端设置的，也不是nginx设置的**。
