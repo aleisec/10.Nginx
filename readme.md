@@ -140,9 +140,9 @@ server {
 location匹配优先级排序：
 
 1. 等号类型（=）的优先级最高。一旦匹配成功，则不再查找其他匹配项。（location = abc ）
-2.^~类型表达式。一旦匹配成功，则不再查找其他匹配项。（location ^~ /images/）
-3.正则表达式类型（~ ~*）的优先级次之。如果有多个location的正则能匹配的话，则使用正则表达式最长的那个。（location ~* \.(gif|jpg|jpeg)$）
-4.常规字符串匹配类型。按前缀匹配。（location /documents/ ）
+2. ^~类型表达式。一旦匹配成功，则不再查找其他匹配项。（location ^~ /images/）
+3. 正则表达式类型（~ ~*）的优先级次之。如果有多个location的正则能匹配的话，则使用正则表达式最长的那个。（location ~* \.(gif|jpg|jpeg)$）
+4. 常规字符串匹配类型。按前缀匹配。（location /documents/ ）
 
 
 ---
