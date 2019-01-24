@@ -199,7 +199,18 @@ proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
 ```
 proxy_set_header X-Forwarded-Proto $scheme; 设置代理请求的和原协议保持一致协议
 ```
-### 注意点：
+
+### 十、隐藏nginx版本号
+```
+http {
+# ……省略配置
+	server_tokens off;   ->即可隐藏nginx版本号
+# …….省略配置
+}
+```
+
+
+### END、注意点：
 1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
 2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的，而不是nginx服务设置的。请求头时前端设置的，也不是nginx设置的**。
 >正向代理只是起到一个桥梁的左右，可以设置多个桥梁，例如前端请求node服务代理，node代理请求nginx搭理，nginx搭理请求真正的后台。
