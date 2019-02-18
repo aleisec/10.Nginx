@@ -36,7 +36,7 @@ Nginx 是一款高性能的 Web和 反向代理 服务器，简单来说就是�
 ### 二、安装
 [下载nginx](http://nginx.org/en/download.html)
 
-* 解压，存放在心仪的，这里我们存放到 `G:\`， 注意目录中不能有中文
+* 解压，存放在心仪的目录，这里我们存放到 `G:\`， 注意目录中不能有中文
 * 打开cmd,进入`G:\nginx-1.14.1` 目录,
 * 运行命令`start nginx`启动nginx服务。访问localhost:80（默认，可以自己设置）测试是否访问成功。
 >至此，nginx服务器安装和启动完毕
@@ -51,7 +51,7 @@ Nginx 是一款高性能的 Web和 反向代理 服务器，简单来说就是�
 * 正常停止或关闭Nginx：nginx -s quit
 * window下终止所有的nginx进程命令：taskkill /im nginx.exe /f
 >tip：多次在没有nginx -s stop 的情况下 start nginx 会启动多个nginx服务，而且通过 nginx -s stop 只能关闭最后一个nginx进程，通过`taskkill /im nginx.exe /f`这种方式可以关闭所有的nginx进程。
-window下测试nginx,感觉好像配置修改后不生效，服务器关了还能访问，因为后台没有真正关闭nginx服务，在任务管理器中可以查看到有多个nginx服务，可以通知这种方式结束nginx任务。
+window下测试nginx,有时候感觉好像配置修改后不生效，服务器关了还能访问，是因为后台没有真正关闭nginx服务，在任务管理器中可以查看到有多个nginx服务，可以通知这种方式结束nginx任务。
 
 ---
 ### 四、把nginx作为静态资源服务器：
@@ -62,7 +62,7 @@ window下测试nginx,感觉好像配置修改后不生效，服务器关了还�
           # 前端静态文件路径
 		location / {
             root   F:\biguiyuan\project;
-            # 缓存过期时间
+            # 设置缓存过期时间  Cache-Control 和 Expires 头控制的缓存
             expires 3d;
         }
     }
@@ -87,7 +87,7 @@ server {
     		root   F:\biguiyuan\project;
 		    expires -1; 
 		}
-		#api为后端文件夹名称
+		#api为后端接口的baseUrl
 		location /api/ {
 	         proxy_pass http://localhost:8000;
 	    }
@@ -182,10 +182,13 @@ location = /404.html {
 #### 内置参数：
 * $remote_addr ：#发出请求的访问地址的IP地址
 ```
+设置X-Real-IP代理请求的请求头的 例子：
 proxy_set_header X-Real-Ip $remote_addr;  X-Real-IP请求头一般只记录真实发出请求的客户端IP
 ```
-* $proxy_add_x_forwarded_for ：#请求的请求头中的"X-Forwarded-For"，与$remote_addr（请求的IP地址）两部分，他们之间用逗号分开。
+
+* $proxy_add_x_forwarded_for ：#包含请求的请求头中的"X-Forwarded-For"与$remote_addr（请求的IP地址）两部分，他们之间用逗号分开。
 ```
+加深X-Forwarded-For理解的例子：
 举个例子，有一个web应用，在它之前通过了两个nginx转发，即用户访问该web通过两台nginx。 
 在第一台nginx中,使用 
 proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for; 
@@ -197,6 +200,7 @@ proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
 * $http_host：#请求地址，即浏览器中你输入的地址（IP或域名）
 * $scheme ：   #请求使用的Web协议，"http" 或 "https"
 ```
+设置代理请求的协议的例子：
 proxy_set_header X-Forwarded-Proto $scheme; 设置代理请求的和原协议保持一致协议
 ```
 
