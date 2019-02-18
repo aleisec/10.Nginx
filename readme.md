@@ -213,22 +213,25 @@ http {
 }
 ```
 
-
-### END、注意点：
-1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
-2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的，而不是nginx服务设置的。请求头时前端设置的，也不是nginx设置的**。
->正向代理只是起到一个桥梁的左右，可以设置多个桥梁，例如前端请求node服务代理，node代理请求nginx搭理，nginx搭理请求真正的后台。
+### 十一、使用跨域的nginx服务器
 3. nginx正向代理服务也支持跨域，即*浏览器访问的地址的协议域名端口*与*nginx代理服务的协议域名端口*可以不一致。
->（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:3000的服务器上设置响应头支持跨域。       
+>（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:3000或者localhost:8000的服务器上设置响应头支持跨域。       
 ```
+  #nginx服务器设置响应头支持跨域例子：
 http {
-  ###start####
+  ###start#### 注意：这些响应头会与真实服务器中设置的的同名响应头自动拼接，以逗号隔开。
   add_header Access-Control-Allow-Origin *;
   add_header Access-Control-Allow-Headers X-Requested-With;
   add_header Access-Control-Allow-Methods GET,POST,OPTIONS;
   ###end ###
 }
 ```
+
+### END、注意点：
+1. nginx服务可以根据请求的路径，通过location指令分别控制他们的缓存机制，重定向寻找资源的位置...等各种各样的操作，(通俗来说：如果请求路径中包含XXX，那就....)
+2. 通过nginx服务器正向代理后，谷歌浏览器network显示的响应头信息**是 proxy_pass指令指向的服务设置的响应头加上nginx服务设置的响应头。请求头是客户端设置的qing'tou'，也不是nginx设置的**。
+>正向代理只是起到一个桥梁的左右，可以设置多个桥梁，例如前端请求node服务代理，node代理请求nginx搭理，nginx代理请求真正的后台。
+
 
 
 附：[nginx 配置文件中的nginx的location配置详解](https://www.cnblogs.com/sign-ptk/p/6723048.html) 
