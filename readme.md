@@ -213,7 +213,7 @@ http {
 }
 ```
 
-### 十一、使用跨域的nginx服务器
+### 十一、使用跨域的nginx服务器做代理（例子：JsonBird远程服务器代理）
 3. nginx正向代理服务也支持跨域，即*浏览器访问的地址的协议域名端口*与*nginx代理服务的协议域名端口*可以不一致。
 >（例如：访问地址localhost:8080、nginx地址：localhost:3000、后端地址：localhost:8000）这种情况会出现跨域，因为访问地址localhost:8080与请求地址localhost:3000不同，会导致跨域，需要在localhost:3000或者localhost:8000的服务器上设置响应头支持跨域。       
 ```
